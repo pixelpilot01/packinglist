@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,39 +9,50 @@
     <style>
         /* Style for the card container */
         .card {
-            border: 1px solid #ddd; /* subtle border */
-            border-radius: 10px; /* rounded corners */
+            border: 1px solid #ddd;
+            /* subtle border */
+            border-radius: 10px;
+            /* rounded corners */
             padding: 20px;
-            margin-top: 30px; /* push down from the entry fields */
-            width: 300px; /* constant width */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* subtle shadow */
+            margin-top: 30px;
+            /* push down from the entry fields */
+            width: 300px;
+            /* constant width */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            /* subtle shadow */
         }
 
         /* Style for the drug info headers */
         .drug-info-header {
-            color: #333; /* Or any color you prefer */
-            margin-bottom: 20px; /* space between header and barcodes */
-            text-align: center; /* center the drug name */
+            color: #333;
+            /* Or any color you prefer */
+            margin-bottom: 20px;
+            /* space between header and barcodes */
+            text-align: center;
+            /* center the drug name */
         }
 
         /* Add some spacing between the barcodes */
         .barcode-container {
             margin-bottom: 20px;
-            text-align: center; /* center the barcode */
+            text-align: center;
+            /* center the barcode */
         }
 
         /* Style for the barcodes to make them less tall */
         svg {
-            height: 70px; /* adjust as needed */
+            height: 70px;
+            /* adjust as needed */
             width: auto;
         }
     </style>
 </head>
+
 <body>
     <h3> Debbie's IV packing list info</h3>
     <div>
         <input type="text" id="drugNameInput" placeholder="Enter Item Name">
-        <input type="number" id="ndcInput" placeholder="Enter NDC Number">
+        <input type="text" id="ndcInput" placeholder="Enter NDC Number">
         <input type="text" id="lotInput" placeholder="Enter Lot Number">
         <button id="generate">Generate Barcodes</button>
         <button id="clear">Clear</button>
@@ -48,25 +60,27 @@
     <div id="barcodeSection"></div>
     <p id="message" style="color: red;"></p> <!-- Message for alerts -->
     <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const barcodeSectionElement = document.getElementById('barcodeSection');
+        document.addEventListener('DOMContentLoaded', function () {
+            const barcodeSectionElement = document.getElementById('barcodeSection');
 
-    document.getElementById('generate').addEventListener('click', function () {
-        const name = document.getElementById('drugNameInput').value;
-        let ndc = document.getElementById('ndcInput').value;
-        let lot = document.getElementById('lotInput').value;
+            document.getElementById('generate').addEventListener('click', function () {
+                const name = document.getElementById('drugNameInput').value;
+                let ndc = document.getElementById('ndcInput').value;
+                let lot = document.getElementById('lotInput').value;
 
-        // Replace spaces with dashes in NDC and Lot numbers
-        ndc = ndc.replace(/\s+/g, '-');
-        lot = lot.replace(/\s+/g, '-');
+                // Remove non-numeric characters from NDC
+                ndc = ndc.replace(/[^\d]/g, '');
 
-        // Clear previous barcode
-        barcodeSectionElement.innerHTML = '';
-        
-        // Generate new barcode section
-        const drugInfo = document.createElement('div');
-        drugInfo.classList.add('card'); // Add card class for styling
-        drugInfo.innerHTML = `
+                // Remove special characters from Lot, allowing only numbers, letters, and dashes
+                lot = lot.replace(/[^a-zA-Z0-9-]/g, '');
+
+                // Clear previous barcode
+                barcodeSectionElement.innerHTML = '';
+
+                // Generate new barcode section
+                const drugInfo = document.createElement('div');
+                drugInfo.classList.add('card'); // Add card class for styling
+                drugInfo.innerHTML = `
             <h3 class="drug-info-header">${name}</h3>
             <div class="barcode-container">
                 <svg id="barcodeNDC${ndc}"></svg>
@@ -75,19 +89,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 <svg id="barcodeLot${lot}"></svg>
             </div>
         `;
-        barcodeSectionElement.appendChild(drugInfo);
-        JsBarcode(`#barcodeNDC${ndc}`, ndc, { format: "CODE39" });
-        JsBarcode(`#barcodeLot${lot}`, lot, { format: "CODE39" });
-    });
+                barcodeSectionElement.appendChild(drugInfo);
+                JsBarcode(`#barcodeNDC${ndc}`, ndc, { format: "CODE39" });
+                JsBarcode(`#barcodeLot${lot}`, lot, { format: "CODE39" });
+            });
 
-    document.getElementById('clear').addEventListener('click', function () {
-        document.getElementById('drugNameInput').value = '';
-        document.getElementById('ndcInput').value = '';
-        document.getElementById('lotInput').value = '';
-        barcodeSectionElement.innerHTML = ''; // Clear the barcode section as well
-    });
-});
+            document.getElementById('clear').addEventListener('click', function () {
+                document.getElementById('drugNameInput').value = '';
+                document.getElementById('ndcInput').value = '';
+                document.getElementById('lotInput').value = '';
+                barcodeSectionElement.innerHTML = ''; // Clear the barcode section as well
+            });
+        });
+
 
     </script>
 </body>
+
 </html>
