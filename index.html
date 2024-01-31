@@ -6,52 +6,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>barcodes</title>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.min.js"></script>
     <style>
         body {
-            font-family: 'Courier New', Courier, monospace; /* Typewriter-style vibe */
+            font-family: 'Courier New', Courier, monospace;
         }
-        
+
         h3 {
-            font-family: 'Courier New', Courier, monospace; /* Typewriter-style vibe */
-            /* Other styling */
+            font-family: 'Courier New', Courier, monospace;
         }
-        /* Style for the card container */
+
         .card {
             border: 1px solid #ddd;
-            /* subtle border */
             border-radius: 10px;
-            /* rounded corners */
             padding: 20px;
             margin-top: 30px;
-            /* push down from the entry fields */
             width: 300px;
-            /* constant width */
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            /* subtle shadow */
         }
 
-        /* Style for the drug info headers */
         .drug-info-header {
             color: #333;
-            /* Or any color you prefer */
             margin-bottom: 20px;
-            /* space between header and barcodes */
             text-align: center;
-            /* center the drug name */
         }
 
-        /* Add some spacing between the barcodes */
         .barcode-container {
             margin-bottom: 20px;
             text-align: center;
-            /* center the barcode */
         }
 
-        /* Style for the barcodes to make them less tall */
         svg {
             height: 70px;
-            /* adjust as needed */
             width: auto;
+        }
+
+        .barcode-text {
+            font-size: 12px;
+            /* Adjust size as needed */
+            text-align: center;
+            /* Center the text below the barcode */
+            margin-top: -5px;
+            /* Adjust distance between barcode and text */
         }
     </style>
 </head>
@@ -63,57 +59,61 @@
         <input type="text" id="ndcInput" placeholder="Enter NDC Number">
         <input type="text" id="lotInput" placeholder="Enter Lot Number">
         <button id="generate">Generate Barcodes</button>
+        <button id="download">Download Barcode Card</button>
         <button id="clear">Clear</button>
     </div>
     <div id="barcodeSection"></div>
-    <p id="message" style="color: red;"></p> <!-- Message for alerts -->
+    <p id="message" style="color: red;"></p>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const barcodeSectionElement = document.getElementById('barcodeSection');
-
             document.getElementById('generate').addEventListener('click', function () {
                 const name = document.getElementById('drugNameInput').value;
                 let ndc = document.getElementById('ndcInput').value;
                 let lot = document.getElementById('lotInput').value;
 
-                // Remove non-numeric characters from NDC
                 ndc = ndc.replace(/[^\d]/g, '');
-
-                // Remove special characters from Lot, allowing only numbers, letters, and dashes
                 lot = lot.replace(/[^a-zA-Z0-9-]/g, '');
 
-                // Clear previous barcode
                 barcodeSectionElement.innerHTML = '';
 
-                // Generate new barcode section
                 const drugInfo = document.createElement('div');
-                drugInfo.classList.add('card'); // Add card class for styling
+                drugInfo.classList.add('card');
                 drugInfo.innerHTML = `
-            <h3 class="drug-info-header">${name}</h3>
-            <div class="barcode-container">
-                <svg id="barcodeNDC${ndc}"></svg>
-            </div>
-            <div class="barcode-container">
-                <svg id="barcodeLot${lot}"></svg>
-            </div>
-        `;
+                    <h3 class="drug-info-header">${name}</h3>
+                    <div class="barcode-container">
+                        <svg id="barcodeNDC"></svg>
+                        <div class="barcode-text">${ndc}</div>
+                    </div>
+                    <div class="barcode-container">
+                        <svg id="barcodeLot"></svg>
+                        <div class="barcode-text">${lot}</div>
+                    </div>
+                `;
                 barcodeSectionElement.appendChild(drugInfo);
-                // JsBarcode(`#barcodeNDC${ndc}`, ndc, { format: "CODE39" });
-                // JsBarcode(`#barcodeLot${lot}`, lot, { format: "CODE39" });
 
-                JsBarcode(`#barcodeNDC${ndc}`, ndc, { format: "CODE128" });
-                JsBarcode(`#barcodeLot${lot}`, lot, { format: "CODE128" });
+                JsBarcode(`#barcodeNDC`, ndc, { format: "CODE128", height: 70, displayValue: false });
+                JsBarcode(`#barcodeLot`, lot, { format: "CODE128", height: 70, displayValue: false });
             });
 
             document.getElementById('clear').addEventListener('click', function () {
                 document.getElementById('drugNameInput').value = '';
                 document.getElementById('ndcInput').value = '';
                 document.getElementById('lotInput').value = '';
-                barcodeSectionElement.innerHTML = ''; // Clear the barcode section as well
+                barcodeSectionElement.innerHTML = '';
             });
+
+            document.getElementById('download').addEventListener('click', function () {
+                const itemName = document.getElementById('drugNameInput').value.replace(/[^a-z0-9]/gi, '_').toLowerCase(); // Sanitize and lower case the item name
+                html2canvas(document.querySelector('.card'), { scale: 3 }).then(canvas => {
+                    let link = document.createElement('a');
+                    link.download = `barcode_card_${itemName}.png`; // Append the sanitized item name to the file name
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                });
+            });
+
         });
-
-
     </script>
 </body>
 
